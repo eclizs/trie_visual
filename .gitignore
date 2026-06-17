@@ -1,0 +1,19 @@
+# Build artifacts
+*.o
+*.so
+*.out
+*.exe
+trie
+obj/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+
+# Editor/temp files
+*~
+*.swp
+*.DS_Store
+
+# VS Code workspace settings
+.vscode/
