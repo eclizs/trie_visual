@@ -111,15 +111,15 @@ void printTrieNode(TrieNode *root, char *signedPrefix) //wrapper function
 	printTrieNode_rec(node, buffer, length, &number);
 }
 
-static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Word* arrWords, int *number)
+static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Entry* arrWords, int *counter)
 {
 	if(node == NULL) return;
 	
 	if(node->terminal)
 	{
-		arrWords[*number - 1].word = strdup(buffer);
-		arrWords[*number - 1].description = strdup(node->description);
-		*number += 1;
+		arrWords[*counter].word = strdup(buffer);
+		arrWords[*counter].description = strdup(node->description);
+		*counter += 1;
 	}
 	
 	for(int i = 0; i < NUM_CHAR; i++)
@@ -129,18 +129,18 @@ static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Wor
 			// printf("DEBUG: i=%d, buffer=%s\n", i, buffer);
 			buffer[length] = i;
 			buffer[length+1] = '\0';
-			findWords_rec(node->children[i], buffer, length+1, arrWords, number);
+			findWords_rec(node->children[i], buffer, length+1, arrWords, counter);
 		}
 	}
 }
 
-void findWords(TrieNode *root, char *signedPrefix, Word* arrWords) //wrapper function
+WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 {
 	if(root == NULL)
 	{
 		printf("There is no slang word in the dictionary.\nPress enter to continue...");
 		getchar();
-		return;
+		return (WordList){0};
 	}
 
 	unsigned char buffer[1000];
@@ -152,7 +152,7 @@ void findWords(TrieNode *root, char *signedPrefix, Word* arrWords) //wrapper fun
 		TrieNode *prefixNode = findPrefixNode(root, signedPrefix);
 		unsigned char *prefix = (unsigned char*)signedPrefix;
 		
-		if(prefixNode == NULL) return;
+		if(prefixNode == NULL) return (WordList){0};
 		
 		memcpy(buffer, prefix, strlen(signedPrefix));
 		buffer[strlen(signedPrefix)] = '\0';
@@ -168,8 +168,15 @@ void findWords(TrieNode *root, char *signedPrefix, Word* arrWords) //wrapper fun
 	}
 	// printf("DEBUG:%s\n", buffer);
 
-	int number = 1;
-	findWords_rec(node, buffer, length, arrWords, &number);
+	int counter = 0;
+
+	Entry* arrWords = (Entry*)calloc(1000, sizeof(Entry));
+	findWords_rec(node, buffer, length, arrWords, &counter);
+	return (WordList)
+	{
+		.entries = arrWords,
+		.count = counter
+	};
 }
 
 TrieNode* findPrefixNode(TrieNode *root, char *signedPrefix)
@@ -255,28 +262,28 @@ void destroyTrieNode(TrieNode **root)
 	*root = NULL;
 }
 
-int main()
-{
-	TrieNode *root = NULL;
-	insertTrieNode(&root, "hello", "greeting");
-	insertTrieNode(&root, "nigger", "dwuiahn dfuiwawas");
-	insertTrieNode(&root, "nagger", "dwuiahn dfuiwawas");
-	printTrieNode(root, "");
-	printf("\n");
-	printTrieNode(root, "n");
-	printTrieNode(root, "ni");
+// int main()
+// {
+// 	TrieNode *root = NULL;
+// 	insertTrieNode(&root, "hello", "greeting");
+// 	insertTrieNode(&root, "nigger", "dwuiahn dfuiwawas");
+// 	insertTrieNode(&root, "nagger", "dwuiahn dfuiwawas");
+// 	printTrieNode(root, "");
+// 	printf("\n");
+// 	printTrieNode(root, "n");
+// 	printTrieNode(root, "ni");
 
-	TrieNode *test = findPrefixNode(root, "hello");
+// 	TrieNode *test = findPrefixNode(root, "hello");
 
-	Word arrWords[10];
-	findWords(root, "", arrWords);
+// 	Entry arrWords[10];
+// 	findWords(root, "", arrWords);
 
-	for (size_t i = 0; i < 3; i++)
-	{
-		printf("%s - %s\n", arrWords[i].word, arrWords[i].description);
-	}
+// 	for (size_t i = 0; i < 3; i++)
+// 	{
+// 		printf("%s - %s\n", arrWords[i].word, arrWords[i].description);
+// 	}
 	
-	printf("%d\n", test->terminal);
-	if(test != NULL) printf("test is not null\n");
-	if(test->terminal) printf("Found prefix node: %s\n", test->description);
-}
+// 	printf("%d\n", test->terminal);
+// 	if(test != NULL) printf("test is not null\n");
+// 	if(test->terminal) printf("Found prefix node: %s\n", test->description);
+// }

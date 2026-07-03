@@ -1,4 +1,5 @@
 import re
+import ctypes
 
 def parse_header(filepath: str) -> list:
     with open(filepath, "r") as f:
@@ -15,9 +16,11 @@ def parse_header(filepath: str) -> list:
         func_param = [p.strip() for p in func_param.split(",") if p.strip()]
         
         i = 0
-        for param in func_param:
+        for i, param in enumerate(func_param):
             func_param[i] = param.split(" ")[0]
-            i += 1
+            pointers = param.count("*")
+            if func_param[i].count("*") == 0:
+                func_param[i] += "*" * pointers
 
         if return_val.split()[-1] in ("typedef", "struct", "enum"):
             continue
@@ -25,7 +28,3 @@ def parse_header(filepath: str) -> list:
         functions.append((func_name, func_param, return_val))
 
     return functions
-
-if __name__ == "__main__":
-    result = parse_header("include/trie.h")
-    print(result)

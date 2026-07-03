@@ -11,16 +11,21 @@ typedef struct TrieNode{
 	char* description;
 } TrieNode;
 
-typedef struct Word{
+typedef struct Entry{
 	char* word;
 	char* description;
-} Word;
+} Entry;
+
+typedef struct WordList{
+	Entry* entries;
+	int count;
+} WordList;
 
 TrieNode* createTrieNode();
 bool insertTrieNode(TrieNode** root, char* signedText, char* desc);
 void printTrieNode(TrieNode* root, char* signedPrefix);
-void findWords(TrieNode* root, char* signedPrefix, Word* arrWords);
-TrieNode* findPrefixNode(TrieNode *root, char* prefix);
+WordList findWords(TrieNode* root, char* signedPrefix);
+TrieNode* findPrefixNode(TrieNode* root, char* prefix);
 bool deleteWord(TrieNode** root, char* signedText);
 void destroyTrieNode(TrieNode** root);
 
