@@ -50,7 +50,7 @@ async def get_word(word: str, request: Request):
 
     node = findPrefixNode(root, word.encode('utf-8'))
 
-    if not node:
+    if not node or not node.contents.terminal:
         return {"message": "Word not found."}
     return {"word": word, "description": node.contents.description.decode('utf-8')}
 
