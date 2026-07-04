@@ -11,7 +11,8 @@ async def lifespan(app: FastAPI):
     app.state.root = root
     app.state.functions = functions
     functions["insertTrieNode"](ctypes.byref(root), b"hello", b"greetings this is hello")
-    functions["insertTrieNode"](ctypes.byref(root), b"world", b"greetings this is world")
+    functions["insertTrieNode"](ctypes.byref(root), b"hella", b"greetings this is hella")
+    functions["insertTrieNode"](ctypes.byref(root), b"helli", b"greetings this is helli")
 
     yield
 
@@ -38,8 +39,6 @@ async def search_word(prefix: str, request: Request):
                 description=entry.description.decode('utf-8')
             ))
     
-    if response == []:
-        return {"message": "No matching words found."}
     return response
 
 @app.get("/words/{word}")
@@ -53,9 +52,9 @@ async def get_word(word: str, request: Request):
         return {"message": "Word not found."}
     return {"word": word, "description": node.description.decode('utf-8')}
 
-@app.post("/insert/")
-async def insert_word(entry: WordEntry, request: Request):
+@app.post("/insert")
+async def insert_word(word: str, desc: str, request: Request):
     insertTrieNode = request.app.state.functions["insertTrieNode"]
     root = request.app.state.root
-    insertTrieNode(ctypes.byref(root), entry.word.encode('utf-8'), entry.description.encode('utf-8'))
+    insertTrieNode(ctypes.byref(root), word.encode('utf-8'), desc.encode('utf-8'))
 
