@@ -1,6 +1,6 @@
 import ctypes
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from .init import init_trie
 from contextlib import asynccontextmanager
@@ -49,7 +49,7 @@ async def get_word(word: str, request: Request):
     node = findPrefixNode(root, word.encode('utf-8'))
 
     if not node or not node.contents.terminal:
-        return {"message": "Word not found."}
+        raise HTTPException(status_code=404, detail="Word not found")
     return {"word": word, "description": node.contents.description.decode('utf-8')}
 
 @app.post("/insert")
