@@ -28,5 +28,6 @@ WordList findWords(TrieNode* root, char* signedPrefix);
 TrieNode* findPrefixNode(TrieNode* root, char* prefix);
 bool deleteWord(TrieNode** root, char* signedText);
 void destroyTrieNode(TrieNode** root);
+void freeWordList(WordList wordList);
 
 #endif

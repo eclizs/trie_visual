@@ -262,6 +262,18 @@ void destroyTrieNode(TrieNode **root)
 	*root = NULL;
 }
 
+void freeWordList(WordList wordList)
+{
+	if(!wordList.entries) return;
+
+	for(int i = 0; i < wordList.count; i++)
+	{
+		free(wordList.entries[i].word);
+		free(wordList.entries[i].description);
+	}
+	free(wordList.entries);
+}
+
 // int main()
 // {
 // 	TrieNode *root = NULL;
