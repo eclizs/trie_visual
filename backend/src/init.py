@@ -9,7 +9,7 @@ libtrie = ctypes.CDLL(os.path.join(path, "libtrie.so"))
 class TrieNode(ctypes.Structure):
     pass
 
-TrieNode._fields_ = [("children", ctypes.POINTER(TrieNode) * 256),
+TrieNode._fields_ = [("children", ctypes.POINTER(TrieNode) * 52),
                 ("terminal", ctypes.c_bool),
                 ("description", ctypes.c_char_p)]
 
@@ -36,7 +36,7 @@ ctypes_map = {
         }
 
 def init_pointer_type(type, pointer_level: int):
-    if pointer_level == 0:
+    if pointer_level == 0:  
         return type
     else:
         return ctypes.POINTER(init_pointer_type(type, pointer_level - 1))
