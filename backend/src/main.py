@@ -2,7 +2,7 @@ import ctypes
 
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
-from backend.src.trie import TrieNode, Entry, init_trie
+from .init import init_trie
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
@@ -10,9 +10,7 @@ async def lifespan(app: FastAPI):
     root, functions = init_trie()
     app.state.root = root
     app.state.functions = functions
-    functions["insertTrieNode"](ctypes.byref(root), b"hello", b"greetings this is hello")
-    functions["insertTrieNode"](ctypes.byref(root), b"hella", b"greetings this is hella")
-    functions["insertTrieNode"](ctypes.byref(root), b"helli", b"greetings this is helli")
+    
 
     yield
 
@@ -29,7 +27,7 @@ async def search_word(prefix: str, request: Request):
     root = request.app.state.root
 
 
-    word_list = findWords(root, prefix.encode('utf-8') )
+    word_list = findWords(root, prefix.encode('utf-8'))
 
     response = []
     
