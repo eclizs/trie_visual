@@ -5,6 +5,9 @@
 #include<ctype.h>
 #include "trie.h"
 
+#define MAX_WORD_COUNT 1000
+#define MAX_WORD_LENGTH 100
+
 TrieNode *createTrieNode()
 {
 	TrieNode *newNode = (TrieNode*)calloc(1,sizeof(TrieNode));
@@ -89,7 +92,7 @@ void printTrieNode(TrieNode *root, char *signedPrefix) //wrapper function
 		return;
 	}
 
-	unsigned char buffer[1000];
+	unsigned char buffer[MAX_WORD_LENGTH];
 
 	TrieNode *node = NULL;
 	int length;
@@ -121,6 +124,7 @@ void printTrieNode(TrieNode *root, char *signedPrefix) //wrapper function
 static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Entry* entries, int *counter)
 {
 	if(node == NULL) return;
+	if(*counter >= MAX_WORD_COUNT) return; // Prevent overflow of entries array
 	
 	if(node->terminal)
 	{
@@ -150,7 +154,7 @@ WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 		return (WordList){NULL, 0};
 	}
 
-	unsigned char buffer[1000];
+	unsigned char buffer[MAX_WORD_LENGTH];
 
 	TrieNode *node = NULL;
 	int length;
@@ -177,7 +181,7 @@ WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 
 	int counter = 0;
 
-	Entry* entries = (Entry*)calloc(1000, sizeof(Entry));
+	Entry* entries = (Entry*)calloc(MAX_WORD_COUNT, sizeof(Entry));
 	findWords_rec(node, buffer, length, entries, &counter);
 	return (WordList)
 	{
