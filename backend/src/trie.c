@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include<string.h>
+#include<ctype.h>
 #include "trie.h"
 
 TrieNode *createTrieNode()
@@ -30,10 +31,16 @@ bool insertTrieNode(TrieNode **root, char *signedText, char *desc)
 	
 	for(int i = 0 ; i < length; i++)
 	{
-		if(temp->children[text[i]] == NULL)
-			temp->children[text[i]] = createTrieNode();
+		if(!isalpha(text[i]))
+		{
+			printf("Invalid character '%c' in word. Only letters are allowed.", text[i]);
+			return false;
+		}
+		int index = (isupper(text[i])) ? (text[i] - 'A') : (text[i] - 'a' + 26);
+		if(temp->children[index] == NULL)
+			temp->children[index] = createTrieNode();
 			
-		temp = temp->children[text[i]];
+		temp = temp->children[index];
 	}
 	
 	if(temp->terminal == true)
@@ -66,7 +73,7 @@ static void printTrieNode_rec(TrieNode *node, unsigned char *buffer, int length,
 		if(node->children[i] != NULL)
 		{
 			// printf("DEBUG: i=%d, buffer=%s\n", i, buffer);
-			buffer[length] = i;
+			buffer[length] = ((i + 'A') > 90) ? (i + 'A' + 6) : (i + 'A');
 			buffer[length+1] = '\0';
 			printTrieNode_rec(node->children[i], buffer, length+1, number);
 		}
@@ -93,11 +100,11 @@ void printTrieNode(TrieNode *root, char *signedPrefix) //wrapper function
 		
 		if(prefixNode == NULL) return;
 		
-		memcpy(buffer, prefix, strlen(signedPrefix));
-		buffer[strlen(signedPrefix)] = '\0';
+		length = strlen(signedPrefix);
+		memcpy(buffer, prefix, length);
+		buffer[length] = '\0';
 
 		node = prefixNode;
-		length = strlen(signedPrefix);
 	}
 	else 
 	{
@@ -127,7 +134,7 @@ static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Ent
 		if(node->children[i] != NULL)
 		{
 			// printf("DEBUG: i=%d, buffer=%s\n", i, buffer);
-			buffer[length] = i;
+			buffer[length] = ((i + 'A') > 90) ? (i + 'A' + 6) : (i + 'A');
 			buffer[length+1] = '\0';
 			findWords_rec(node->children[i], buffer, length+1, entries, counter);
 		}
@@ -140,7 +147,7 @@ WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 	{
 		printf("There is no slang word in the dictionary.\nPress enter to continue...");
 		getchar();
-		return (WordList){0};
+		return (WordList){NULL, 0};
 	}
 
 	unsigned char buffer[1000];
@@ -152,13 +159,13 @@ WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 		TrieNode *prefixNode = findPrefixNode(root, signedPrefix);
 		unsigned char *prefix = (unsigned char*)signedPrefix;
 		
-		if(prefixNode == NULL) return (WordList){0};
+		if(prefixNode == NULL) return (WordList){NULL, 0};
 		
-		memcpy(buffer, prefix, strlen(signedPrefix));
-		buffer[strlen(signedPrefix)] = '\0';
+		length = strlen(signedPrefix);
+		memcpy(buffer, prefix, length);
+		buffer[length] = '\0';
 
 		node = prefixNode;
-		length = strlen(signedPrefix);
 	}
 	else 
 	{
@@ -187,9 +194,10 @@ TrieNode* findPrefixNode(TrieNode *root, char *signedPrefix)
 	
 	for(int i = 0; i < length; i++)
 	{
-		if(temp == NULL) return NULL;
+		if(temp == NULL || !isalpha(prefix[i])) return NULL;
 		
-		temp = temp->children[prefix[i]];
+		int index = (isupper(prefix[i])) ? (prefix[i] - 'A') : (prefix[i] - 'a' + 26);
+		temp = temp->children[index];
 	}
 	
 	return temp;
@@ -227,7 +235,7 @@ static TrieNode* deleteWord_rec(TrieNode *node, unsigned char *text, bool *delet
 		return node;
 	}
 
-	node->children[text[0]] = deleteWord_rec(node->children[text[0]], text + 1, deleted);
+	node->children[text[0] - 'A'] = deleteWord_rec(node->children[text[0] - 'A'], text + 1, deleted);
 
 	if(*deleted && !nodeHasChildren(node) && !node->terminal)
 	{

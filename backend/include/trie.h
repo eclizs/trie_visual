@@ -3,7 +3,7 @@
 
 #include<stdbool.h>
 
-#define NUM_CHAR 256
+#define NUM_CHAR 52
 
 typedef struct TrieNode{
 	struct TrieNode* children[NUM_CHAR];
