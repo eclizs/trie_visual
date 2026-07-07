@@ -8,6 +8,18 @@
 #define MAX_WORD_COUNT 1000
 #define MAX_WORD_LENGTH 100
 
+int getIdx(char letter)
+{
+	if(isspace(letter)) return WHITE_SPACE_IDX;
+	return (isupper(letter)) ? (letter - 'A') : (letter - 'a' + 26);
+}
+
+char setChar(int idx)
+{
+	if(isspace(idx)) return WHITE_SPACE_ASCII;
+	return ((idx + 'A') > 90) ? (idx + 'A' + 6) : (idx + 'A');
+}
+
 TrieNode *createTrieNode()
 {
 	TrieNode *newNode = (TrieNode*)calloc(1,sizeof(TrieNode));
@@ -39,7 +51,7 @@ bool insertTrieNode(TrieNode **root, char *signedText, char *desc)
 			printf("Invalid character '%c' in word. Only letters are allowed.", text[i]);
 			return false;
 		}
-		int index = (isupper(text[i])) ? (text[i] - 'A') : (text[i] - 'a' + 26);
+		int index = getIdx(text[i]);
 		if(temp->children[index] == NULL)
 			temp->children[index] = createTrieNode();
 			
@@ -76,7 +88,7 @@ static void printTrieNode_rec(TrieNode *node, unsigned char *buffer, int length,
 		if(node->children[i] != NULL)
 		{
 			// printf("DEBUG: i=%d, buffer=%s\n", i, buffer);
-			buffer[length] = ((i + 'A') > 90) ? (i + 'A' + 6) : (i + 'A');
+			buffer[length] = setChar(i);
 			buffer[length+1] = '\0';
 			printTrieNode_rec(node->children[i], buffer, length+1, number);
 		}
@@ -138,7 +150,7 @@ static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Ent
 		if(node->children[i] != NULL)
 		{
 			// printf("DEBUG: i=%d, buffer=%s\n", i, buffer);
-			buffer[length] = ((i + 'A') > 90) ? (i + 'A' + 6) : (i + 'A');
+			buffer[length] = setChar(i);
 			buffer[length+1] = '\0';
 			findWords_rec(node->children[i], buffer, length+1, entries, counter);
 		}
