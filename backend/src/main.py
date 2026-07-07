@@ -49,12 +49,32 @@ async def get_word(word: str, request: Request):
     node = findPrefixNode(root, word.encode('utf-8'))
 
     if not node or not node.contents.terminal:
-        raise HTTPException(status_code=404, detail="Word not found")
-    return {"word": word, "description": node.contents.description.decode('utf-8')}
+        raise HTTPException(status_code=404, detail=f"{word} not found")
+    return WordEntry(
+        word=word,
+        description= node.contents.description.decode('utf-8')
+    )
 
 @app.post("/insert")
 async def insert_word(word: str, desc: str, request: Request):
     insertTrieNode = request.app.state.functions["insertTrieNode"]
+    findPrefixNode = request.app.state.functions["findPrefixNode"]
     root = request.app.state.root
-    insertTrieNode(ctypes.byref(root), word.encode('utf-8'), desc.encode('utf-8'))
+
+    if not word.isalpha():
+        raise HTTPException(status_code=400, detail=f"\"{word}\" has unsupported characters")
+    c_word = word.encode('utf-8')
+    c_desc = desc.encode('utf-8')
+
+    node = findPrefixNode(root, c_word)
+    wordExists = False
+    if node and node.contents.terminal:
+        wordExists = True
+    result = insertTrieNode(ctypes.byref(root), word.encode('utf-8'), desc.encode('utf-8'))
+
+
+    if result == False and wordExists == True:
+        return {"message": "successfully updated an existing word"}
+    elif result == True and wordExists == False:
+        return {"message": "successfully inserted a new word"}
 
