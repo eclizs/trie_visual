@@ -1,16 +1,19 @@
 import ctypes
+import re
 
 from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from .init import init_trie
 from contextlib import asynccontextmanager
 
+async def word_is_valid(word: str):
+    return bool(re.match(r'^[a-zA-Z\s*\@\"\']*$', word))
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     root, functions = init_trie()
     app.state.root = root
     app.state.functions = functions
-    
 
     yield
 
@@ -50,6 +53,7 @@ async def get_word(word: str, request: Request):
 
     if not node or not node.contents.terminal:
         raise HTTPException(status_code=404, detail=f"{word} not found")
+
     return WordEntry(
         word=word,
         description= node.contents.description.decode('utf-8')
@@ -61,7 +65,7 @@ async def insert_word(word: str, desc: str, request: Request):
     findPrefixNode = request.app.state.functions["findPrefixNode"]
     root = request.app.state.root
 
-    if not word.isalpha():
+    if not word_is_valid(word):
         raise HTTPException(status_code=400, detail=f"\"{word}\" has unsupported characters")
     c_word = word.encode('utf-8')
     c_desc = desc.encode('utf-8')
@@ -70,7 +74,7 @@ async def insert_word(word: str, desc: str, request: Request):
     wordExists = False
     if node and node.contents.terminal:
         wordExists = True
-    result = insertTrieNode(ctypes.byref(root), word.encode('utf-8'), desc.encode('utf-8'))
+    result = insertTrieNode(ctypes.byref(root), c_word, c_desc)
 
 
     if result == False and wordExists == True:
