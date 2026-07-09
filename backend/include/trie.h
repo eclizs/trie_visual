@@ -4,8 +4,6 @@
 #include<stdbool.h>
 
 #define NUM_CHAR 53 // 26 upper 26 lower and 1 whitespace
-#define WHITE_SPACE_IDX 52
-#define WHITE_SPACE_ASCII 32
 
 typedef struct TrieNode{
 	struct TrieNode* children[NUM_CHAR];

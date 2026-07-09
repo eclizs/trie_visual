@@ -3,20 +3,57 @@
 #include<stdbool.h>
 #include<string.h>
 #include<ctype.h>
+#include<regex.h>
 #include "trie.h"
 
 #define MAX_WORD_COUNT 1000
 #define MAX_WORD_LENGTH 100
 
-int getIdx(char letter)
+#define INDEXES \
+		INDEX("WHITE_SPACE") \
+		INDEX("FRONT_SLASH") \
+		INDEX("AT_SIGN") \
+		INDEX("DOUBLE_QUOTES") \
+		INDEX("COMMA") \
+		INDEX("")
+
+#define WHITE_SPACE_ASCII 32
+
+typedef enum {
+	WHITE_SPACE_IDX = 52,
+
+};
+
+bool wordIsValid(char* text)
+{
+	regex_t regex;
+
+	const char* pattern = "^[a-zA-Z0-9\s/@\"-()]*$";
+
+	regcomp(&regex, pattern, REG_EXTENDED);
+
+	if(regexec(&regex, text, 0, NULL, 0) == 0)
+	{
+		regfree(&regex);
+		return true;
+	}
+	else
+	{
+		regfree(&regex);
+		return false;
+
+	}
+}
+
+static int getIdx(char letter)
 {
 	if(isspace(letter)) return WHITE_SPACE_IDX;
 	return (isupper(letter)) ? (letter - 'A') : (letter - 'a' + 26);
 }
 
-char setChar(int idx)
+static char setChar(int idx)
 {
-	if(isspace(idx)) return WHITE_SPACE_ASCII;
+	if(idx == WHITE_SPACE_IDX) return WHITE_SPACE_ASCII;
 	return ((idx + 'A') > 90) ? (idx + 'A' + 6) : (idx + 'A');
 }
 
@@ -26,8 +63,7 @@ TrieNode *createTrieNode()
 
 	if(newNode == NULL)
 	{
-		printf("Memory allocation failed! Program will be terminated. Press enter to continue...\n");
-		getchar();
+		printf("Memory allocation failed! Program will be terminated.\n");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -46,11 +82,6 @@ bool insertTrieNode(TrieNode **root, char *signedText, char *desc)
 	
 	for(int i = 0 ; i < length; i++)
 	{
-		if(!isalpha(text[i]))
-		{
-			printf("Invalid character '%c' in word. Only letters are allowed.", text[i]);
-			return false;
-		}
 		int index = getIdx(text[i]);
 		if(temp->children[index] == NULL)
 			temp->children[index] = createTrieNode();
@@ -99,8 +130,7 @@ void printTrieNode(TrieNode *root, char *signedPrefix) //wrapper function
 {
 	if(root == NULL)
 	{
-		printf("There is no slang word in the dictionary.\nPress enter to continue...");
-		getchar();
+		printf("There is no slang word in the dictionary.\n");
 		return;
 	}
 
@@ -161,8 +191,7 @@ WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 {
 	if(root == NULL)
 	{
-		printf("There is no slang word in the dictionary.\nPress enter to continue...");
-		getchar();
+		printf("There is no slang word in the dictionary.\n");
 		return (WordList){NULL, 0};
 	}
 
@@ -212,7 +241,7 @@ TrieNode* findPrefixNode(TrieNode *root, char *signedPrefix)
 	{
 		if(temp == NULL || !isalpha(prefix[i])) return NULL;
 		
-		int index = (isupper(prefix[i])) ? (prefix[i] - 'A') : (prefix[i] - 'a' + 26);
+		int index = getIdx(prefix[i]);
 		temp = temp->children[index];
 	}
 	

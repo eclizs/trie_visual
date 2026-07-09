@@ -6,8 +6,10 @@ from pydantic import BaseModel
 from .init import init_trie
 from contextlib import asynccontextmanager
 
+re.ASCII
+
 async def word_is_valid(word: str):
-    return bool(re.match(r'^[a-zA-Z\s*\@\"\']*$', word))
+    return bool(re.match(r'^[a-zA-Z0-9\s/@"-()]*$', word))
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
