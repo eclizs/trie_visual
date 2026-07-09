@@ -34,8 +34,8 @@ async def search_word(prefix: str, request: Request):
 
     response = []
     
-    for i in range(word_list.count):
-        entry = word_list.entries[i]
+    for i in range(word_list.contents.count):
+        entry = word_list.contents.entries[i]
         response.append(WordEntry(
                 word=entry.word.decode('utf-8'),
                 description=entry.description.decode('utf-8')
@@ -62,7 +62,6 @@ async def get_word(word: str, request: Request):
 @app.post("/insert")
 async def insert_word(word: str, desc: str, request: Request):
     insertTrieNode = request.app.state.functions["insertTrieNode"]
-    findPrefixNode = request.app.state.functions["findPrefixNode"]
     root = request.app.state.root
 
     if not word_is_valid(word):
@@ -70,15 +69,11 @@ async def insert_word(word: str, desc: str, request: Request):
     c_word = word.encode('utf-8')
     c_desc = desc.encode('utf-8')
 
-    node = findPrefixNode(root, c_word)
-    wordExists = False
-    if node and node.contents.terminal:
-        wordExists = True
     result = insertTrieNode(ctypes.byref(root), c_word, c_desc)
 
 
-    if result == False and wordExists == True:
+    if result == False:
         return {"message": "successfully updated an existing word"}
-    elif result == True and wordExists == False:
+    else:
         return {"message": "successfully inserted a new word"}
 
