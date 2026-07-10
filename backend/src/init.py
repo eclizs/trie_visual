@@ -6,7 +6,7 @@ path = os.path.abspath(os.path.dirname(__file__))
 
 libtrie = ctypes.CDLL(os.path.join(path, "libtrie.so"))
 
-NUM_CHAR = 53
+NUM_CHAR = 70
 
 class TrieNode(ctypes.Structure):
     pass

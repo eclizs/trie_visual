@@ -9,52 +9,65 @@
 #define MAX_WORD_COUNT 1000
 #define MAX_WORD_LENGTH 100
 
-#define INDEXES \
-		INDEX("WHITE_SPACE") \
-		INDEX("FRONT_SLASH") \
-		INDEX("AT_SIGN") \
-		INDEX("DOUBLE_QUOTES") \
-		INDEX("COMMA") \
-		INDEX("")
-
-#define WHITE_SPACE_ASCII 32
-
-typedef enum {
-	WHITE_SPACE_IDX = 52,
-
-};
+#define INDEXES 							\
+		INDEX(WHITE_SPACE, ' ', 32, 52) 	\
+		INDEX(FRONT_SLASH, '/', 47, 53) 	\
+		INDEX(AT_SIGN, '@', 64, 54) 		\
+		INDEX(DOUBLE_QUOTES, '\"', 34, 55) 	\
+		INDEX(COMMA, ',', 44, 56)			\
+		INDEX(FRONT_BRACKETS, '(', 40, 57) 	\
+		INDEX(BACK_BRACKETS, ')', 41, 58) 	\
+		INDEX(PERIOD, '.', 46, 59) 			\
+		INDEX(DIGIT_0, '0', 48, 60) 		\
+		INDEX(DIGIT_1, '1', 49, 61) 		\
+		INDEX(DIGIT_2, '2', 50, 62) 		\
+		INDEX(DIGIT_3, '3', 51, 63) 		\
+		INDEX(DIGIT_4, '4', 52, 64) 		\
+		INDEX(DIGIT_5, '5', 53, 65) 		\
+		INDEX(DIGIT_6, '6', 54, 66) 		\
+		INDEX(DIGIT_7, '7', 55, 67) 		\
+		INDEX(DIGIT_8, '8', 56, 68) 		\
+		INDEX(DIGIT_9, '9', 57, 69)
 
 bool wordIsValid(char* text)
 {
 	regex_t regex;
 
-	const char* pattern = "^[a-zA-Z0-9\s/@\"-()]*$";
+	const char* pattern = "^[-a-zA-Z0-9 /@\"()+.]*$";
 
 	regcomp(&regex, pattern, REG_EXTENDED);
 
-	if(regexec(&regex, text, 0, NULL, 0) == 0)
-	{
-		regfree(&regex);
-		return true;
-	}
-	else
-	{
-		regfree(&regex);
-		return false;
+	bool result;
 
-	}
+	if(regexec(&regex, text, 0, NULL, 0) == 0) result = true;
+	else result = false;
+
+	regfree(&regex);
+	return result;
 }
 
 static int getIdx(char letter)
 {
-	if(isspace(letter)) return WHITE_SPACE_IDX;
+	switch(letter)
+	{
+		#define INDEX(name, ch, ascii, idx) case ch: return idx;
+		INDEXES
+		#undef INDEX
+	}
+
 	return (isupper(letter)) ? (letter - 'A') : (letter - 'a' + 26);
 }
 
-static char setChar(int idx)
+static char setChar(int index)
 {
-	if(idx == WHITE_SPACE_IDX) return WHITE_SPACE_ASCII;
-	return ((idx + 'A') > 90) ? (idx + 'A' + 6) : (idx + 'A');
+	switch(index)
+	{
+		#define INDEX(name, ch, ascii, idx) case idx: return ascii;
+		INDEXES
+		#undef INDEX
+	}
+	
+	return ((index + 'A') > 90) ? (index + 'A' + 6) : (index + 'A');
 }
 
 TrieNode *createTrieNode()

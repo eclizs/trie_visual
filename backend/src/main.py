@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 re.ASCII
 
 async def word_is_valid(word: str):
-    return bool(re.match(r'^[a-zA-Z0-9\s/@"-()]*$', word))
+    return bool(re.match(r'^[-a-zA-Z0-9 /@"()+.]*$', word))
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
