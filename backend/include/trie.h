@@ -3,7 +3,7 @@
 
 #include<stdbool.h>
 
-#define NUM_CHAR 70 // 26 upper 26 lower, 8 special chars, and digits 0-9
+#define NUM_CHAR 72 // 26 upper 26 lower, 9 special chars, and digits 0-9
 
 typedef struct TrieNode{
 	struct TrieNode* children[NUM_CHAR];

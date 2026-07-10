@@ -27,7 +27,9 @@
 		INDEX(DIGIT_6, '6', 54, 66) 		\
 		INDEX(DIGIT_7, '7', 55, 67) 		\
 		INDEX(DIGIT_8, '8', 56, 68) 		\
-		INDEX(DIGIT_9, '9', 57, 69)
+		INDEX(DIGIT_9, '9', 57, 69)			\
+		INDEX(HYPHEN, '-', 45, 70)			\
+		INDEX(PLUS_SIGN, '+', 43, 71)
 
 bool wordIsValid(char* text)
 {
@@ -263,11 +265,13 @@ TrieNode* findPrefixNode(TrieNode *root, char *signedPrefix)
 	for(int i = 0; i < length; i++)
 	{
 		if(temp == NULL) return NULL;
-		printf("i = %d\n", i);
+
 		int index = getIdx(prefix[i]);
+		printf("char=%c, index=%d\n",prefix[i], index);
 		temp = temp->children[index];
 	}
 	
+	printf("temp is terminal: %d\n", temp->terminal);
 	return temp;
 }
 

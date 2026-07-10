@@ -35,8 +35,6 @@ async def search_word(prefix: str, request: Request):
     word_list = findWords(root, prefix.encode('utf-8'))
 
     response = []
-
-    print(word_list.count)
     
     for i in range(word_list.count):
         entry = word_list.entries[i]
@@ -48,13 +46,12 @@ async def search_word(prefix: str, request: Request):
     freeWordList(word_list)
     return response
 
-@app.get("/words/{word}")
+@app.get("/words")
 async def get_word(word: str, request: Request):
     findPrefixNode = request.app.state.functions["findPrefixNode"]
     root = request.app.state.root
 
-    print(word.encode('utf-8'))
-    node = findPrefixNode(root, word.encode('utf-8'))   
+    node = findPrefixNode(root, word.encode('utf-8'))  
 
     if not node or not node.contents.terminal:
         raise HTTPException(status_code=404, detail=f"{word} not found")

@@ -6,7 +6,7 @@ path = os.path.abspath(os.path.dirname(__file__))
 
 libtrie = ctypes.CDLL(os.path.join(path, "libtrie.so"))
 
-NUM_CHAR = 70
+NUM_CHAR = 72
 
 class TrieNode(ctypes.Structure):
     pass
@@ -73,6 +73,6 @@ def init_trie():
     for func_name, argtypes, restype in functions:
         func_dict[func_name] = init_function(func_name, argtypes, restype)
 
-    root = func_dict["createTrieNode"]()
+    root = None
 
     return root, func_dict
