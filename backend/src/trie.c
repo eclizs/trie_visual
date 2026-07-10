@@ -33,7 +33,7 @@ bool wordIsValid(char* text)
 {
 	regex_t regex;
 
-	const char* pattern = "^[-a-zA-Z0-9 /@\"()+.]*$";
+	const char* pattern = "^[-a-zA-Z0-9 /@\"()+.,]*$";
 
 	regcomp(&regex, pattern, REG_EXTENDED);
 
@@ -178,7 +178,11 @@ void printTrieNode(TrieNode *root, char *signedPrefix) //wrapper function
 
 static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Entry* entries, int *counter)
 {
-	if(node == NULL) return;
+	if(node == NULL)
+	{
+		printf("node is null\n");
+		return;
+	}
 	if(*counter >= MAX_WORD_COUNT) return; // Prevent overflow of entries array
 	
 	if(node->terminal)
@@ -192,7 +196,7 @@ static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Ent
 	{
 		if(node->children[i] != NULL)
 		{
-			// printf("DEBUG: i=%d, buffer=%s\n", i, buffer);
+			printf("DEBUG: i=%d, buffer=%s\n", i, buffer);
 			buffer[length] = setChar(i);
 			buffer[length+1] = '\0';
 			findWords_rec(node->children[i], buffer, length+1, entries, counter);
@@ -231,7 +235,7 @@ WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 		node = root;
 		length = 0;
 	}
-	// printf("DEBUG:%s\n", buffer);
+	printf("DEBUG:%s\n", buffer);
 
 	int counter = 0;
 
@@ -249,11 +253,17 @@ TrieNode* findPrefixNode(TrieNode *root, char *signedPrefix)
 	TrieNode *temp = root;
 	int length = strlen(signedPrefix);
 	unsigned char *prefix = (unsigned char*)signedPrefix;
+
+	if(!wordIsValid(signedPrefix))
+	{
+		printf("word is not valid");
+		return NULL;
+	}
 	
 	for(int i = 0; i < length; i++)
 	{
-		if(temp == NULL || !isalpha(prefix[i])) return NULL;
-		
+		if(temp == NULL) return NULL;
+		printf("i = %d\n", i);
 		int index = getIdx(prefix[i]);
 		temp = temp->children[index];
 	}
