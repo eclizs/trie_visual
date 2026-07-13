@@ -1,7 +1,8 @@
 import ctypes
 import re
 
-from fastapi import FastAPI, Request, HTTPException
+from typing import Annotated
+from fastapi import FastAPI, Query, Request, HTTPException
 from pydantic import BaseModel
 from .init import init_trie
 from contextlib import asynccontextmanager
@@ -26,11 +27,13 @@ class WordEntry(BaseModel):
 app = FastAPI(lifespan=lifespan)
 
 @app.get("/search")
-async def search_word(prefix: str, request: Request):
+async def search_word(request: Request, prefix: Annotated[ str | None, Query(max_length=10, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$')] = None,):
     findWords = request.app.state.functions["findWords"]
     freeWordList = request.app.state.functions["freeWordList"]
     root = request.app.state.root
 
+    if(not prefix):
+        prefix = ""
 
     word_list = findWords(root, prefix.encode('utf-8'))
 

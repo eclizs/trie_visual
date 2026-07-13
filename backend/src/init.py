@@ -73,6 +73,6 @@ def init_trie():
     for func_name, argtypes, restype in functions:
         func_dict[func_name] = init_function(func_name, argtypes, restype)
 
-    root = None
+    root = ctypes.POINTER(TrieNode)()
 
     return root, func_dict
