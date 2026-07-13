@@ -27,7 +27,7 @@ class WordEntry(BaseModel):
 app = FastAPI(lifespan=lifespan)
 
 @app.get("/search")
-async def search_word(request: Request, prefix: Annotated[ str | None, Query(max_length=10, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$')] = None,):
+async def search_word(request: Request, prefix: Annotated[ str | None, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ] = None,):
     findWords = request.app.state.functions["findWords"]
     freeWordList = request.app.state.functions["freeWordList"]
     root = request.app.state.root
@@ -50,7 +50,7 @@ async def search_word(request: Request, prefix: Annotated[ str | None, Query(max
     return response
 
 @app.get("/words")
-async def get_word(word: str, request: Request):
+async def get_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], request: Request):
     findPrefixNode = request.app.state.functions["findPrefixNode"]
     root = request.app.state.root
 
@@ -65,7 +65,7 @@ async def get_word(word: str, request: Request):
     )
 
 @app.post("/insert")
-async def insert_word(word: str, desc: str, request: Request):
+async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], desc: str, request: Request):
     insertTrieNode = request.app.state.functions["insertTrieNode"]
     root = request.app.state.root
 
