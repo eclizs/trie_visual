@@ -32,7 +32,7 @@ async def search_word(request: Request, prefix: Annotated[ str | None, Query(max
     freeWordList = request.app.state.functions["freeWordList"]
     root = request.app.state.root
 
-    if(not prefix):
+    if not prefix:
         prefix = ""
 
     word_list = findWords(root, prefix.encode('utf-8'))
