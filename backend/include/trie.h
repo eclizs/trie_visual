@@ -1,7 +1,7 @@
 #ifndef TRIE_H
 #define TRIE_H
 
-#include<stdbool.h>
+#include <stdbool.h>
 
 #define NUM_CHAR 72 // 26 upper 26 lower, 9 special chars, and digits 0-9
 
@@ -22,7 +22,7 @@ typedef struct WordList{
 } WordList;
 
 TrieNode* createTrieNode();
-bool insertTrieNode(TrieNode** root, char* signedText, char* desc);
+int insertTrieNode(TrieNode** root, char* signedText, char* desc);
 void printTrieNode(TrieNode* root, char* signedPrefix);
 WordList findWords(TrieNode* root, char* signedPrefix);
 TrieNode* findPrefixNode(TrieNode* root, char* prefix);

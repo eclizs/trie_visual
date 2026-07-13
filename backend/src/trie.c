@@ -92,9 +92,9 @@ TrieNode *createTrieNode()
 	return newNode;
 }
 
-bool insertTrieNode(TrieNode **root, char *signedText, char *desc)
+int insertTrieNode(TrieNode **root, char *signedText, char *desc)
 {
-	if(strlen(signedText) == 0 || strlen(desc) == 0) return false;
+	if(strlen(signedText) == 0 || strlen(desc) == 0) return 400;
 	if(*root == NULL) *root = createTrieNode();
 	
 	unsigned char *text = (unsigned char*)signedText;
@@ -115,7 +115,7 @@ bool insertTrieNode(TrieNode **root, char *signedText, char *desc)
 	{
 		free(temp->description);
 		temp->description = strdup(desc);
-		return false;
+		return 200;
 	}
 	else
 	{
@@ -123,7 +123,7 @@ bool insertTrieNode(TrieNode **root, char *signedText, char *desc)
 		temp->description = strdup(desc);
 	}
 	
-	return temp->terminal;
+	return 201;
 }
 
 static void printTrieNode_rec(TrieNode *node, unsigned char *buffer, int length, int *number)

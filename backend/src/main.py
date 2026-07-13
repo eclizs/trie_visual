@@ -76,9 +76,10 @@ async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a
 
     result = insertTrieNode(ctypes.byref(root), c_word, c_desc)
 
-
-    if result == False:
+    if result == 400:
+        raise HTTPException(status_code=400, detail=f"'{word}' or '{desc}' is empty")
+    elif result == 200:
         return {"message": "successfully updated an existing word"}
-    else:
+    elif result == 201:
         return {"message": "successfully inserted a new word"}
 
