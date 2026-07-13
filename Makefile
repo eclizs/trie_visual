@@ -1,6 +1,10 @@
 CC      = gcc
 CFLAGS  = -fPIC -shared -Ibackend/include
 
+ifeq ($(DEBUG),1)
+CFLAGS += -DDEBUG -g
+endif
+
 SRC_DIR = backend/src
 
 SRCS = $(wildcard $(SRC_DIR)/*.c)

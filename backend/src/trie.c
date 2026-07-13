@@ -6,6 +6,12 @@
 #include<regex.h>
 #include "trie.h"
 
+#ifdef DEBUG
+    #define DEBUG_PRINT(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
+#else
+    #define DEBUG_PRINT(fmt, ...) ((void)0)
+#endif
+
 #define MAX_WORD_COUNT 1000
 #define MAX_WORD_LENGTH 100
 
@@ -30,6 +36,7 @@
 		INDEX(DIGIT_9, '9', 57, 69)			\
 		INDEX(HYPHEN, '-', 45, 70)			\
 		INDEX(PLUS_SIGN, '+', 43, 71)
+		//	    name   ,char,ascii,idx
 
 bool wordIsValid(char* text)
 {
@@ -133,7 +140,7 @@ static void printTrieNode_rec(TrieNode *node, unsigned char *buffer, int length,
 	{
 		if(node->children[i] != NULL)
 		{
-			// printf("DEBUG: i=%d, buffer=%s\n", i, buffer);
+			DEBUG_PRINT("DEBUG: i=%d, buffer=%s\n", i, buffer);
 			buffer[length] = setChar(i);
 			buffer[length+1] = '\0';
 			printTrieNode_rec(node->children[i], buffer, length+1, number);
@@ -172,7 +179,7 @@ void printTrieNode(TrieNode *root, char *signedPrefix) //wrapper function
 		node = root;
 		length = 0;
 	}
-	// printf("DEBUG:%s\n", buffer);
+	DEBUG_PRINT("DEBUG: %s\n", buffer);
 
 	int number = 1;
 	printTrieNode_rec(node, buffer, length, &number);
@@ -198,7 +205,7 @@ static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Ent
 	{
 		if(node->children[i] != NULL)
 		{
-			printf("DEBUG: i=%d, buffer=%s\n", i, buffer);
+			DEBUG_PRINT("DEBUG: i=%d, buffer=%s\n", i, buffer);
 			buffer[length] = setChar(i);
 			buffer[length+1] = '\0';
 			findWords_rec(node->children[i], buffer, length+1, entries, counter);
@@ -237,7 +244,7 @@ WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 		node = root;
 		length = 0;
 	}
-	printf("DEBUG:%s\n", buffer);
+	// printf("DEBUG:%s\n", buffer);
 
 	int counter = 0;
 
@@ -267,11 +274,11 @@ TrieNode* findPrefixNode(TrieNode *root, char *signedPrefix)
 		if(temp == NULL) return NULL;
 
 		int index = getIdx(prefix[i]);
-		printf("char=%c, index=%d\n",prefix[i], index);
+		DEBUG_PRINT("char=%c, index=%d\n", prefix[i], index);
 		temp = temp->children[index];
 	}
 	
-	printf("temp is terminal: %d\n", temp->terminal);
+	DEBUG_PRINT("temp is terminal: %d\n", temp->terminal);
 	return temp;
 }
 
