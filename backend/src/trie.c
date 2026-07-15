@@ -16,27 +16,29 @@
 #define MAX_WORD_LENGTH 100
 
 #define INDEXES 							\
-		INDEX(WHITE_SPACE, ' ', 32, 52) 	\
-		INDEX(FRONT_SLASH, '/', 47, 53) 	\
-		INDEX(AT_SIGN, '@', 64, 54) 		\
-		INDEX(DOUBLE_QUOTES, '\"', 34, 55) 	\
-		INDEX(COMMA, ',', 44, 56)			\
-		INDEX(FRONT_BRACKETS, '(', 40, 57) 	\
-		INDEX(BACK_BRACKETS, ')', 41, 58) 	\
-		INDEX(PERIOD, '.', 46, 59) 			\
-		INDEX(DIGIT_0, '0', 48, 60) 		\
-		INDEX(DIGIT_1, '1', 49, 61) 		\
-		INDEX(DIGIT_2, '2', 50, 62) 		\
-		INDEX(DIGIT_3, '3', 51, 63) 		\
-		INDEX(DIGIT_4, '4', 52, 64) 		\
-		INDEX(DIGIT_5, '5', 53, 65) 		\
-		INDEX(DIGIT_6, '6', 54, 66) 		\
-		INDEX(DIGIT_7, '7', 55, 67) 		\
-		INDEX(DIGIT_8, '8', 56, 68) 		\
-		INDEX(DIGIT_9, '9', 57, 69)			\
-		INDEX(HYPHEN, '-', 45, 70)			\
-		INDEX(PLUS_SIGN, '+', 43, 71)
+		INDEX(WHITE_SPACE, ' ', 32, 26) 	\
+		INDEX(FRONT_SLASH, '/', 47, 27) 	\
+		INDEX(AT_SIGN, '@', 64, 28) 	\
+		INDEX(DOUBLE_QUOTES, '"', 34, 29) 	\
+		INDEX(COMMA, ',', 44, 30)			\
+		INDEX(FRONT_BRACKETS, '(', 40, 31) 	\
+		INDEX(BACK_BRACKETS, ')', 41, 32) 	\
+		INDEX(PERIOD, '.', 46, 33) 			\
+		INDEX(DIGIT_0, '0', 48, 34) 	\
+		INDEX(DIGIT_1, '1', 49, 35) 	\
+		INDEX(DIGIT_2, '2', 50, 36) 	\
+		INDEX(DIGIT_3, '3', 51, 37) 	\
+		INDEX(DIGIT_4, '4', 52, 38) 	\
+		INDEX(DIGIT_5, '5', 53, 39) 	\
+		INDEX(DIGIT_6, '6', 54, 40) 	\
+		INDEX(DIGIT_7, '7', 55, 41) 	\
+		INDEX(DIGIT_8, '8', 56, 42) 	\
+		INDEX(DIGIT_9, '9', 57, 43)			\
+		INDEX(HYPHEN, '-', 45, 44)			\
+		INDEX(PLUS_SIGN, '+', 43, 45)
 		//	    name   ,char,ascii,idx
+
+int getNumChar() { return NUM_CHAR; }
 
 bool wordIsValid(char* text)
 {
@@ -64,7 +66,7 @@ static int getIdx(char letter)
 		#undef INDEX
 	}
 
-	return (isupper(letter)) ? (letter - 'A') : (letter - 'a' + 26);
+	return (letter - 'a');
 }
 
 static char setChar(int index)
@@ -76,7 +78,7 @@ static char setChar(int index)
 		#undef INDEX
 	}
 	
-	return ((index + 'A') > 90) ? (index + 'A' + 6) : (index + 'A');
+	return (index + 'a');
 }
 
 TrieNode *createTrieNode()
@@ -314,7 +316,7 @@ static TrieNode* deleteWord_rec(TrieNode *node, unsigned char *text, bool *delet
 		return node;
 	}
 
-	node->children[text[0] - 'A'] = deleteWord_rec(node->children[text[0] - 'A'], text + 1, deleted);
+	node->children[getIdx(text[0])] = deleteWord_rec(node->children[getIdx(text[0])], text + 1, deleted);
 
 	if(*deleted && !nodeHasChildren(node) && !node->terminal)
 	{
