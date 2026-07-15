@@ -21,6 +21,7 @@ typedef struct WordList{
 	int count;
 } WordList;
 
+int getNumChar();
 TrieNode* createTrieNode();
 int insertTrieNode(TrieNode** root, char* signedText, char* desc);
 void printTrieNode(TrieNode* root, char* signedPrefix);
