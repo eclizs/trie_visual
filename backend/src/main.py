@@ -79,7 +79,20 @@ async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a
     if result == 400:
         raise HTTPException(status_code=400, detail=f"'{word}' or '{desc}' is empty")
     elif result == 200:
-        return {"message": "successfully updated an existing word"}
+        return {"message": f"successfully updated '{word}'"}
     elif result == 201:
-        return {"message": "successfully inserted a new word"}
+        return {"message": f"successfully inserted '{word}'"}
+
+
+@app.delete("/delete")
+async def delete_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], request: Request):
+    deleteWord = request.app.state.functions["deleteWord"]
+    root = request.app.state.root
+
+    result = deleteWord(ctypes.byref(root), word.encode('utf-8'))
+
+    if result == False:
+        raise HTTPException(status_code=404, detail=f"'{word}' not found")
+    else:
+        return {"message": f"successfully deleted '{word}'"}
 
