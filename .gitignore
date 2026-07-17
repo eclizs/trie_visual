@@ -4,6 +4,7 @@
 *.out
 *.exe
 trie
+test_trie
 obj/
 
 # Python artifacts

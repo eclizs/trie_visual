@@ -65,11 +65,16 @@ static int getIdx(char letter)
 		INDEXES
 		#undef INDEX
 	}
+	if(letter < 97)
+	{
+		DEBUG_PRINT("ERROR: invalid character\n");
+		exit(EXIT_FAILURE);
+	}
 
 	return (letter - 'a');
 }
 
-static char setChar(int index)
+static char setChar(int index, bool isCapitalized)
 {
 	switch(index)
 	{
@@ -78,37 +83,51 @@ static char setChar(int index)
 		#undef INDEX
 	}
 	
-	return (index + 'a');
+	if(isCapitalized) return index + 'A';
+	else return (index + 'a');
 }
 
-TrieNode *createTrieNode()
+static void toLowerCase(unsigned char* text)
+{
+	for(int i = 0; text[i] != '\0'; i++) text[i] = tolower(text[i]);
+}
+
+TrieNode *createTrieNode(bool isCapitalized)
 {
 	TrieNode *newNode = (TrieNode*)calloc(1,sizeof(TrieNode));
 
 	if(newNode == NULL)
 	{
-		printf("Memory allocation failed! Program will be terminated.\n");
+		DEBUG_PRINT("Memory allocation failed! Program will be terminated.\n");
 		exit(EXIT_FAILURE);
 	}
+	newNode->isCapitalized = isCapitalized;
 	
 	return newNode;
 }
 
 int insertTrieNode(TrieNode **root, char *signedText, char *desc)
 {
-	if(strlen(signedText) == 0 || strlen(desc) == 0) return 400;
-	if(*root == NULL) *root = createTrieNode();
+	if(strlen(signedText) == 0 || strlen(desc) == 0 || !wordIsValid(signedText)) return 400;
+	if(*root == NULL) *root = createTrieNode(false);
 	
 	unsigned char *text = (unsigned char*)signedText;
+
+	DEBUG_PRINT("DEBUG: text after converting to lowercase: %s\n", text);
 	
 	TrieNode *temp = *root;
 	int length = strlen(signedText);
+	DEBUG_PRINT("DEBUG: signedText: %s\n", signedText);
 	
 	for(int i = 0 ; i < length; i++)
 	{
+		bool isCapitalized = isupper(text[i]);
+		text[i] = tolower(text[i]);
+		
 		int index = getIdx(text[i]);
+		DEBUG_PRINT("DEBUG: isCapitalized: %d\n", isCapitalized);
 		if(temp->children[index] == NULL)
-			temp->children[index] = createTrieNode();
+			temp->children[index] = createTrieNode(isCapitalized);
 			
 		temp = temp->children[index];
 	}
@@ -134,7 +153,7 @@ static void printTrieNode_rec(TrieNode *node, unsigned char *buffer, int length,
 	
 	if(node->terminal)
 	{
-		printf("%d. %s\n", *number, buffer);
+		DEBUG_PRINT("%d. %s\n", *number, buffer);
 		*number += 1;
 	}
 	
@@ -142,9 +161,9 @@ static void printTrieNode_rec(TrieNode *node, unsigned char *buffer, int length,
 	{
 		if(node->children[i] != NULL)
 		{
-			DEBUG_PRINT("DEBUG: i=%d, buffer=%s\n", i, buffer);
-			buffer[length] = setChar(i);
+			buffer[length] = setChar(i, node->children[i]->isCapitalized);
 			buffer[length+1] = '\0';
+			DEBUG_PRINT("DEBUG: i=%d, buffer=%s\n", i, buffer);
 			printTrieNode_rec(node->children[i], buffer, length+1, number);
 		}
 	}
@@ -154,7 +173,12 @@ void printTrieNode(TrieNode *root, char *signedPrefix) //wrapper function
 {
 	if(root == NULL)
 	{
-		printf("There is no slang word in the dictionary.\n");
+		DEBUG_PRINT("There is no slang word in the dictionary.\n");
+		return;
+	}
+	if(!wordIsValid(signedPrefix))
+	{
+		DEBUG_PRINT("Invalid word format\n");
 		return;
 	}
 
@@ -191,7 +215,7 @@ static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Ent
 {
 	if(node == NULL)
 	{
-		printf("node is null\n");
+		DEBUG_PRINT("node is null\n");
 		return;
 	}
 	if(*counter >= MAX_WORD_COUNT) return; // Prevent overflow of entries array
@@ -207,9 +231,10 @@ static void findWords_rec(TrieNode *node, unsigned char *buffer, int length, Ent
 	{
 		if(node->children[i] != NULL)
 		{
-			DEBUG_PRINT("DEBUG: i=%d, buffer=%s\n", i, buffer);
-			buffer[length] = setChar(i);
+			DEBUG_PRINT("DEBUG: isCapitalized: %d\n", node->children[i]->isCapitalized);
+			buffer[length] = setChar(i, node->children[i]->isCapitalized);
 			buffer[length+1] = '\0';
+			DEBUG_PRINT("DEBUG: i=%d, buffer=%s\n", i, buffer);
 			findWords_rec(node->children[i], buffer, length+1, entries, counter);
 		}
 	}
@@ -219,7 +244,12 @@ WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 {
 	if(root == NULL)
 	{
-		printf("There is no slang word in the dictionary.\n");
+		DEBUG_PRINT("There is no slang word in the dictionary.\n");
+		return (WordList){NULL, 0};
+	}
+	if(!wordIsValid(signedPrefix))
+	{
+		DEBUG_PRINT("Invalid word format\n");
 		return (WordList){NULL, 0};
 	}
 
@@ -231,10 +261,14 @@ WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 	{
 		TrieNode *prefixNode = findPrefixNode(root, signedPrefix);
 		unsigned char *prefix = (unsigned char*)signedPrefix;
+
+		toLowerCase(prefix);
 		
 		if(prefixNode == NULL) return (WordList){NULL, 0};
 		
 		length = strlen(signedPrefix);
+		DEBUG_PRINT("DEBUG: prefix=%s, length=%d\n", prefix, length);
+
 		memcpy(buffer, prefix, length);
 		buffer[length] = '\0';
 
@@ -246,7 +280,7 @@ WordList findWords(TrieNode *root, char *signedPrefix) //wrapper function
 		node = root;
 		length = 0;
 	}
-	// printf("DEBUG:%s\n", buffer);
+	DEBUG_PRINT("DEBUG:%s\n", buffer);
 
 	int counter = 0;
 
@@ -264,23 +298,25 @@ TrieNode* findPrefixNode(TrieNode *root, char *signedPrefix)
 	TrieNode *temp = root;
 	int length = strlen(signedPrefix);
 	unsigned char *prefix = (unsigned char*)signedPrefix;
+	toLowerCase(prefix);
 
 	if(!wordIsValid(signedPrefix))
 	{
-		printf("word is not valid");
+		DEBUG_PRINT("word is not valid");
 		return NULL;
 	}
 	
+	DEBUG_PRINT("DEBUG: prefix=%s, length=%d\n", prefix, length);
 	for(int i = 0; i < length; i++)
 	{
 		if(temp == NULL) return NULL;
 
 		int index = getIdx(prefix[i]);
-		DEBUG_PRINT("char=%c, index=%d\n", prefix[i], index);
+		DEBUG_PRINT("DEBUG: char=%c, index=%d\n", prefix[i], index);
 		temp = temp->children[index];
 	}
 	
-	DEBUG_PRINT("temp is terminal: %d\n", temp->terminal);
+	if(temp != NULL) DEBUG_PRINT("DEBUG: temp is terminal: %d\n", temp->terminal);
 	return temp;
 }
 
@@ -316,7 +352,8 @@ static TrieNode* deleteWord_rec(TrieNode *node, unsigned char *text, bool *delet
 		return node;
 	}
 
-	node->children[getIdx(text[0])] = deleteWord_rec(node->children[getIdx(text[0])], text + 1, deleted);
+	int index = getIdx(text[0]);
+	node->children[index] = deleteWord_rec(node->children[index], text + 1, deleted);
 
 	if(*deleted && !nodeHasChildren(node) && !node->terminal)
 	{
@@ -328,7 +365,7 @@ static TrieNode* deleteWord_rec(TrieNode *node, unsigned char *text, bool *delet
 
 bool deleteWord(TrieNode **root, char *signedText)
 {
-	if(*root == NULL || strlen(signedText) == 0) return false;
+	if(*root == NULL || strlen(signedText) == 0 || !wordIsValid(signedText)) return false;
 	unsigned char *text = (unsigned char*)signedText;
 	bool result = false;
 

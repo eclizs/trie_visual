@@ -9,6 +9,7 @@ typedef struct TrieNode{
 	struct TrieNode* children[NUM_CHAR];
 	bool terminal;
 	char* description;
+	bool isCapitalized;
 } TrieNode;
 
 typedef struct Entry{
@@ -22,7 +23,7 @@ typedef struct WordList{
 } WordList;
 
 int getNumChar();
-TrieNode* createTrieNode();
+TrieNode* createTrieNode(bool isCapitalized);
 int insertTrieNode(TrieNode** root, char* signedText, char* desc);
 void printTrieNode(TrieNode* root, char* signedPrefix);
 WordList findWords(TrieNode* root, char* signedPrefix);

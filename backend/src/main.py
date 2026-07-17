@@ -51,17 +51,17 @@ async def search_word(request: Request, prefix: Annotated[ str | None, Query(max
 
 @app.get("/words")
 async def get_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], request: Request):
-    findPrefixNode = request.app.state.functions["findPrefixNode"]
+    findWords = request.app.state.functions["findWords"]
     root = request.app.state.root
 
-    node = findPrefixNode(root, word.encode('utf-8'))  
+    entry = findWords(root, word.encode('utf-8'))
 
-    if not node or not node.contents.terminal:
-        raise HTTPException(status_code=404, detail=f"{word} not found")
+    if not entry.entries:
+        raise HTTPException(status_code=404, detail=f"'{word}' not found")
 
     return WordEntry(
-        word=word,
-        description= node.contents.description.decode('utf-8')
+        word=entry.entries[0].word.decode('utf-8'),
+        description=entry.entries[0].description.decode('utf-8')
     )
 
 @app.post("/insert")
@@ -74,6 +74,7 @@ async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a
     c_word = word.encode('utf-8')
     c_desc = desc.encode('utf-8')
 
+    print(c_word)
     result = insertTrieNode(ctypes.byref(root), c_word, c_desc)
 
     if result == 400:
@@ -89,7 +90,9 @@ async def delete_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a
     deleteWord = request.app.state.functions["deleteWord"]
     root = request.app.state.root
 
-    result = deleteWord(ctypes.byref(root), word.encode('utf-8'))
+    c_word = word.encode('utf-8')
+
+    result = deleteWord(ctypes.byref(root), c_word)
 
     if result == False:
         raise HTTPException(status_code=404, detail=f"'{word}' not found")
