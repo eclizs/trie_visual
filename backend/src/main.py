@@ -20,10 +20,6 @@ async def lifespan(app: FastAPI):
 
     yield
 
-class WordEntry(BaseModel):
-    word: str
-    description: str
-
 app = FastAPI(lifespan=lifespan)
 
 @app.get("/search")
@@ -41,10 +37,7 @@ async def search_word(request: Request, prefix: Annotated[ str | None, Query(max
     
     for i in range(word_list.count):
         entry = word_list.entries[i]
-        response.append(WordEntry(
-                word=entry.word.decode('utf-8'),
-                description=entry.description.decode('utf-8')
-            ))
+        response.append(entry.decode('utf-8'))
         
     freeWordList(word_list)
     return response
@@ -59,28 +52,23 @@ async def get_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA
     if not entry.entries:
         raise HTTPException(status_code=404, detail=f"'{word}' not found")
 
-    return WordEntry(
-        word=entry.entries[0].word.decode('utf-8'),
-        description=entry.entries[0].description.decode('utf-8')
-    )
+    return entry.entries[0].decode('utf-8')
 
 @app.post("/insert")
-async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], desc: str, request: Request):
+async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], request: Request):
     insertTrieNode = request.app.state.functions["insertTrieNode"]
     root = request.app.state.root
 
     if not await word_is_valid(word):
         raise HTTPException(status_code=400, detail=f"'{word}' has unsupported characters")
     c_word = word.encode('utf-8')
-    c_desc = desc.encode('utf-8')
 
-    print(c_word)
-    result = insertTrieNode(ctypes.byref(root), c_word, c_desc)
+    result = insertTrieNode(ctypes.byref(root), c_word)
 
     if result == 400:
-        raise HTTPException(status_code=400, detail=f"'{word}' or '{desc}' is empty")
-    elif result == 200:
-        return {"message": f"successfully updated '{word}'"}
+        raise HTTPException(status_code=400, detail=f"'{word}' is empty")
+    elif result == 409:
+        raise HTTPException(status_code=409, detail=f"'{word}' already exists")
     elif result == 201:
         return {"message": f"successfully inserted '{word}'"}
 

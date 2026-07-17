@@ -14,14 +14,10 @@ class TrieNode(ctypes.Structure):
 
 TrieNode._fields_ = [("children", ctypes.POINTER(TrieNode) * NUM_CHAR),
                 ("terminal", ctypes.c_bool),
-                ("description", ctypes.c_char_p)]
-
-class Entry(ctypes.Structure):
-    _fields_ = [("word", ctypes.c_char_p),
-                ("description", ctypes.c_char_p)]
+                ("original", ctypes.c_char_p)]
 
 class WordList(ctypes.Structure):
-    _fields_ = [("entries", ctypes.POINTER(Entry)),
+    _fields_ = [("entries", ctypes.POINTER(ctypes.c_char_p)),
                 ("count", ctypes.c_int)]
 
 ctypes_map = {
