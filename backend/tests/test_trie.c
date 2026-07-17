@@ -14,7 +14,7 @@ static void expect_true(bool condition, const char *message)
     }
 }
 
-static void assert_word_list_contains(WordList list, const char *expected_word, const char *expected_desc)
+static void assert_word_list_contains(WordList list, const char *expected_word)
 {
     bool found = false;
 
@@ -22,26 +22,24 @@ static void assert_word_list_contains(WordList list, const char *expected_word, 
 
     for (int i = 0; i < list.count; i++)
     {
-        if (strcmp(list.entries[i].word, expected_word) == 0 &&
-            strcmp(list.entries[i].description, expected_desc) == 0)
+        if (strcmp(list.entries[i], expected_word) == 0)
         {
             found = true;
             break;
         }
     }
 
-    expect_true(found, "expected word/description pair was not returned");
+    expect_true(found, "expected word was not returned");
 }
 
 static void test_insert_find_and_delete(void)
 {
     TrieNode *root = NULL;
     char word[] = "Hello";
-    char desc[] = "greeting";
     char prefix[] = "h";
     char delete_word[] = "Hello";
 
-    int result = insertTrieNode(&root, word, desc);
+    int result = insertTrieNode(&root, word);
     expect_true(result == 201, "insert should return 201 for a new word");
     expect_true(root != NULL, "root trie should be initialized");
 
@@ -51,7 +49,7 @@ static void test_insert_find_and_delete(void)
 
     WordList found = findWords(root, prefix);
     expect_true(found.count == 1, "prefix search should return exactly one match");
-    assert_word_list_contains(found, "hello", "greeting");
+    assert_word_list_contains(found, "Hello");
     freeWordList(found);
 
     expect_true(deleteWord(&root, delete_word), "deleteWord should remove the inserted word");
@@ -68,20 +66,17 @@ static void test_duplicate_insert_updates_description(void)
     TrieNode *root = NULL;
     char first_word[] = "hello";
     char first_desc[] = "first description";
-    char second_word[] = "Hello";
-    char second_desc[] = "updated description";
     char prefix[] = "hello";
 
-    int first = insertTrieNode(&root, first_word, first_desc);
-    int second = insertTrieNode(&root, second_word, second_desc);
+    int first = insertTrieNode(&root, first_word);
+    int second = insertTrieNode(&root, first_word);
 
     expect_true(first == 201, "first insert should create a new word");
-    expect_true(second == 200, "second insert should update the description for an existing word");
+    expect_true(second == 409, "second insert should fail");
 
     WordList found = findWords(root, prefix);
     expect_true(found.count == 1, "duplicate insert should not create a second entry");
-    expect_true(strcmp(found.entries[0].word, "hello") == 0, "word should be normalized to lowercase form");
-    expect_true(strcmp(found.entries[0].description, "updated description") == 0, "description should be updated");
+    expect_true(strcmp(found.entries[0], "hello") == 0, "word should be normalized to lowercase form");
 
     freeWordList(found);
     destroyTrieNode(&root);
@@ -97,14 +92,11 @@ static void test_invalid_and_empty_inputs(void)
     char empty_desc[] = "";
     char prefix[] = "";
 
-    int invalid_insert = insertTrieNode(&root, invalid_word, valid_desc);
+    int invalid_insert = insertTrieNode(&root, invalid_word);
     expect_true(invalid_insert == 400, "insert should reject unsupported characters");
 
-    int empty_err = insertTrieNode(&root, empty_word, valid_desc);
+    int empty_err = insertTrieNode(&root, empty_word);
     expect_true(empty_err == 400, "insert should reject empty words");
-
-    int empty_desc_result = insertTrieNode(&root, empty_desc_word, empty_desc);
-    expect_true(empty_desc_result == 400, "insert should reject empty descriptions");
 
     WordList empty = findWords(root, prefix);
     expect_true(empty.count == 0, "findWords should return no entries for an empty trie");

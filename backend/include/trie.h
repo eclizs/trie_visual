@@ -8,24 +8,17 @@
 typedef struct TrieNode{
 	struct TrieNode* children[NUM_CHAR];
 	bool terminal;
-	char* description;
-	bool isCapitalized;
+	char* original;
 } TrieNode;
 
-typedef struct Entry{
-	char* word;
-	char* description;
-} Entry;
-
 typedef struct WordList{
-	Entry* entries;
+	char** entries;
 	int count;
 } WordList;
 
 int getNumChar();
-TrieNode* createTrieNode(bool isCapitalized);
-int insertTrieNode(TrieNode** root, char* signedText, char* desc);
-void printTrieNode(TrieNode* root, char* signedPrefix);
+TrieNode* createTrieNode();
+int insertTrieNode(TrieNode** root, char* signedText);
 WordList findWords(TrieNode* root, char* signedPrefix);
 TrieNode* findPrefixNode(TrieNode* root, char* prefix);
 bool deleteWord(TrieNode** root, char* signedText);
