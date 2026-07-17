@@ -90,7 +90,7 @@ static void test_duplicate_insert_updates_description(void)
 static void test_invalid_and_empty_inputs(void)
 {
     TrieNode *root = NULL;
-    char invalid_word[] = "bad@word";
+    char invalid_word[] = "bad:word";
     char valid_desc[] = "desc";
     char empty_word[] = "";
     char empty_desc_word[] = "word";
