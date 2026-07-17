@@ -123,7 +123,7 @@ int insertTrieNode(TrieNode **root, char *signedText, char *desc)
 	{
 		bool isCapitalized = isupper(text[i]);
 		text[i] = tolower(text[i]);
-		
+
 		int index = getIdx(text[i]);
 		DEBUG_PRINT("DEBUG: isCapitalized: %d\n", isCapitalized);
 		if(temp->children[index] == NULL)
@@ -352,7 +352,7 @@ static TrieNode* deleteWord_rec(TrieNode *node, unsigned char *text, bool *delet
 		return node;
 	}
 
-	int index = getIdx(text[0]);
+	int index = getIdx(tolower(text[0]));
 	node->children[index] = deleteWord_rec(node->children[index], text + 1, deleted);
 
 	if(*deleted && !nodeHasChildren(node) && !node->terminal)
