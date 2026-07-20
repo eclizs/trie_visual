@@ -3,7 +3,7 @@ import re
 
 from typing import Annotated
 from fastapi import FastAPI, Query, Request, HTTPException
-from pydantic import BaseModel
+from fastapi.templating import Jinja2Templates
 from .init import init_trie
 from contextlib import asynccontextmanager
 
@@ -22,7 +22,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/search")
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/search",)
 async def search_word(request: Request, prefix: Annotated[ str | None, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ] = None,):
     findWords = request.app.state.functions["findWords"]
     freeWordList = request.app.state.functions["freeWordList"]
@@ -40,19 +42,7 @@ async def search_word(request: Request, prefix: Annotated[ str | None, Query(max
         response.append(entry.decode('utf-8'))
         
     freeWordList(word_list)
-    return response
-
-@app.get("/words")
-async def get_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], request: Request):
-    findWords = request.app.state.functions["findWords"]
-    root = request.app.state.root
-
-    entry = findWords(root, word.encode('utf-8'))
-
-    if not entry.entries:
-        raise HTTPException(status_code=404, detail=f"'{word}' not found")
-
-    return entry.entries[0].decode('utf-8')
+    return templates.TemplateResponse(request, "home.html", {"words": response})
 
 @app.post("/insert")
 async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], request: Request):
@@ -71,7 +61,12 @@ async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a
         raise HTTPException(status_code=409, detail=f"'{word}' already exists")
     elif result == 201:
         return {"message": f"successfully inserted '{word}'"}
+    
 
+# @app.post("/insert_excel")
+# async def insert_excel(filename: str, request: Request)
+#     with open(filename, "r") as f:
+#         f.read()
 
 @app.delete("/delete")
 async def delete_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], request: Request):
