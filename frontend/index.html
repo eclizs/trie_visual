@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>orderan</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <main class="app">
+
+    <!-- Mode switcher -->
+    <nav class="mode-switch" role="tablist" aria-label="Choose action">
+      <button class="mode-btn is-active" data-mode="search" role="tab" aria-selected="true">Search</button>
+      <button class="mode-btn" data-mode="add" role="tab" aria-selected="false">Add a word</button>
+      <button class="mode-btn" data-mode="delete" role="tab" aria-selected="false">Delete a word</button>
+    </nav>
+
+    <!-- SEARCH PANEL -->
+    <section class="panel is-active" id="panel-search" role="tabpanel">
+      <label class="field-label" for="search-input">Look up a word or prefix</label>
+      <div class="search-box">
+        <input
+          id="search-input"
+          class="text-input"
+          type="text"
+          placeholder="type to search…"
+          autocomplete="off"
+          maxlength="100"
+          role="combobox"
+          aria-expanded="false"
+          aria-autocomplete="list"
+          aria-controls="results-list"
+        >
+        <ul class="entry-list" id="results-list" role="listbox" aria-live="polite"></ul>
+      </div>
+  
+      <div class="saved-panel">
+        <label class="field-label">Saved words</label>
+        <pre class="saved-list" id="saved-list">(none yet)</pre>
+      </div>
+    </section>
+
+    <!-- ADD PANEL -->
+    <section class="panel" id="panel-add" role="tabpanel">
+      <label class="field-label" for="add-input">New word</label>
+      <input
+        id="add-input"
+        class="text-input"
+        type="text"
+        placeholder="e.g. gyatt"
+        autocomplete="off"
+        maxlength="100"
+      >
+      <button class="action-btn" id="add-btn">Add to dictionary</button>
+      <p class="status-msg" id="add-status" role="status"></p>
+    </section>
+
+    <!-- DELETE PANEL -->
+    <section class="panel" id="panel-delete" role="tabpanel">
+      <label class="field-label" for="delete-input">Word to remove</label>
+      <input
+        id="delete-input"
+        class="text-input"
+        type="text"
+        placeholder="e.g. gyatt"
+        autocomplete="off"
+        maxlength="100"
+      >
+      <button class="action-btn danger" id="delete-btn">Delete word</button>
+      <p class="status-msg" id="delete-status" role="status"></p>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

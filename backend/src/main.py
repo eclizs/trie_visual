@@ -3,14 +3,14 @@ import re
 
 from typing import Annotated
 from fastapi import FastAPI, Query, Request, HTTPException
-from fastapi.templating import Jinja2Templates
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from .init import init_trie
 from contextlib import asynccontextmanager
 
-re.ASCII
+from pandas import read_csv
 
-async def word_is_valid(word: str):
-    return bool(re.match(r'^[-a-zA-Z0-9 /@"()+.,]*$', word))
+re.ASCII
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,7 +22,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+@app.get("/")
+async def root():
+    return FileResponse("frontend/index.html")
 
 @app.get("/search",)
 async def search_word(request: Request, prefix: Annotated[ str | None, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ] = None,):
@@ -42,15 +46,13 @@ async def search_word(request: Request, prefix: Annotated[ str | None, Query(max
         response.append(entry.decode('utf-8'))
         
     freeWordList(word_list)
-    return templates.TemplateResponse(request, "home.html", {"words": response})
+    return {"words": response}
 
 @app.post("/insert")
 async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], request: Request):
     insertTrieNode = request.app.state.functions["insertTrieNode"]
     root = request.app.state.root
 
-    if not await word_is_valid(word):
-        raise HTTPException(status_code=400, detail=f"'{word}' has unsupported characters")
     c_word = word.encode('utf-8')
 
     result = insertTrieNode(ctypes.byref(root), c_word)
@@ -63,10 +65,23 @@ async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a
         return {"message": f"successfully inserted '{word}'"}
     
 
-# @app.post("/insert_excel")
-# async def insert_excel(filename: str, request: Request)
-#     with open(filename, "r") as f:
-#         f.read()
+@app.post("/insert_excel", include_in_schema=False)
+async def insert_excel(filename: str, request: Request):
+    df = read_csv(filename, header=None)
+
+    fields = ['location', 'code', 'name', 'quantity', 'quantifier', 'total']
+
+    df = df.set_axis(fields, axis=1)
+
+    names = list(df['name'])
+
+    names = [name.strip('"') if name.startswith('"') or name.endswith('"') else name
+            for name in names]
+
+    for name in names:
+        await insert_word(name, request)
+
+    
 
 @app.delete("/delete")
 async def delete_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a-zA-Z0-9 /@"()+.,]*$') ], request: Request):
