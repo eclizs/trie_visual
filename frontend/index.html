@@ -54,6 +54,16 @@
         maxlength="100"
       >
       <button class="action-btn" id="add-btn">Add to dictionary</button>
+      <form method="post" enctype="multipart/form-data">
+        <div>
+          <label for="file">Choose file to upload</label>
+          <input type="file" id="file" name="file" accept=".csv" />
+
+        </div>
+        <div>
+          <button id="uploadBtn" type="button">Submit</button>
+        </div>
+      </form>
       <p class="status-msg" id="add-status" role="status"></p>
     </section>
 

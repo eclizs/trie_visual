@@ -153,6 +153,28 @@ function escapeHtml(str) {
 const addInput = document.getElementById("add-input");
 const addBtn = document.getElementById("add-btn");
 const addStatus = document.getElementById("add-status");
+const fileInput = document.getElementById("file")
+const uploadBtn = document.getElementById("uploadBtn");
+
+uploadBtn.addEventListener("click", async () => {
+  if(!fileInput.files.length)
+  {
+    alert("Select a file first");
+    return;
+  }
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  const response = await fetch(`/insert_excel?filename=${encodeURIComponent(fileInput.files[0].name)}`, {
+      method: "POST",
+      body: formData
+  });
+
+  if (!response.ok) {
+      alert("Upload failed");
+      return;
+  }
+})
 
 addBtn.addEventListener("click", async () => {
   const word = addInput.value.trim();
