@@ -22,17 +22,35 @@ modeBtns.forEach((btn) => {
 
 // ---- Search ----
 const searchInput = document.getElementById("search-input");
+const headerInput = document.getElementById("header-input");
 const resultsList = document.getElementById("results-list");
 const searchBox = document.querySelector(".search-box");
+const clearBtn = document.getElementById("clearBtn");
+const copyBtn = document.getElementById("copyBtn");
+const saveBtn = document.getElementById("saveBtn");
+const headerBtn = document.getElementById("headerBtn");
+
 let debounceTimer;
 let highlightedIndex = -1;
 let count;
 
 searchInput.addEventListener("input", () => {
   clearTimeout(debounceTimer);
-  let prefix = searchInput.value.trim();
-  count = prefix.slice(0, prefix.indexOf(" "))
-  prefix = prefix.slice(prefix.indexOf(" ")+1)
+  
+  const raw = searchInput.value.trim();
+  const spaceIdx = raw.indexOf(" ");
+
+  let prefix = raw;
+  count = "";
+
+  if (spaceIdx !== -1) {
+    const firstWord = raw.slice(0, spaceIdx);
+    if (/^@?\d+$/.test(firstWord)) {
+      count = firstWord + " ";
+      prefix = raw.slice(spaceIdx + 1);
+    }
+  }
+
   debounceTimer = setTimeout(() => runSearch(prefix), 200);
 });
 
@@ -51,12 +69,13 @@ searchInput.addEventListener("keydown", (e) => {
   } else if (e.key === "Enter") {
     if (highlightedIndex >= 0 && items[highlightedIndex]) {
       e.preventDefault();
-      selectWord(count + " " + items[highlightedIndex].dataset.word);
+      selectWord(count + items[highlightedIndex].dataset.word);
     }
   } else if (e.key === "Escape") {
     closeDropdown();
   }
 });
+
 
 document.addEventListener("click", (e) => {
   if (!searchBox.contains(e.target)) closeDropdown();
@@ -72,19 +91,51 @@ function updateHighlight(items) {
 }
 
 const savedList = document.getElementById("saved-list");
-const savedWords = [];
+let savedWords = [];
+let header;
+
+headerBtn.addEventListener("click", () => {
+  header = headerInput.value.trim();
+  if(header == "") return;
+  renderSavedWords();
+  headerInput.value = "";
+});
+
+clearBtn.addEventListener("click", () => {
+  savedWords = [];
+  renderSavedWords();
+  searchInput.focus();
+});
+
+saveBtn.addEventListener("click", () => {
+  let text = savedList.textContent;
+  if(text == "")
+  {
+    setStatus(document.getElementById("save-status"), "Nothing to save!", "err");
+    return;
+  }
+    let blob = new Blob([text], {type: "text/plain"})
+  let url = URL.createObjectURL(blob);
+  
+  let a = document.createElement("a");
+  a.setAttribute("download", `${header}`);
+  a.href = url;
+  a.click();
+});
+
+copyBtn.addEventListener("click", () => {
+  navigator.clipboard.writeText(savedList.textContent);
+});
 
 function selectWord(word) {
   savedWords.push(word);
   renderSavedWords();
-  // searchInput.value = "";
-  closeDropdown();
-  // resultsList.innerHTML = "";
   searchInput.focus();
 }
 
 function renderSavedWords() {
-  savedList.textContent = savedWords.length ? savedWords.join("\n") : "(none yet)";
+  savedList.textContent = header + '\n' +
+                          (savedWords.length ? savedWords.join("\n") : "");
 }
 
 function openDropdown() {
@@ -109,7 +160,7 @@ async function runSearch(prefix) {
     const data = await res.json();
     renderResults(data.words || []);
   } catch (err) {
-    renderMessage("Error: Unprocessable content");
+    renderMessage("No matches found");
   }
 }
 
@@ -128,16 +179,14 @@ function renderResults(words) {
   highlightedIndex = -1;
   resultsList.innerHTML = words
     .map((w) => {
-      const path = w.toLowerCase().split("").join(" → ");
       return `<li class="entry-item" data-word="${escapeHtml(w)}" role="option">
         <div class="entry-word">${escapeHtml(w)}</div>
-        <div class="entry-path">${escapeHtml(path)}</div>
       </li>`;
     })
     .join("");
 
   resultsList.querySelectorAll(".entry-item").forEach((item) => {
-    item.addEventListener("click", () => selectWord(count + " " + item.dataset.word));
+    item.addEventListener("click", () => selectWord(count + item.dataset.word));
   });
 
   openDropdown();
@@ -151,10 +200,10 @@ function escapeHtml(str) {
 
 // ---- Add ----
 const addInput = document.getElementById("add-input");
+const fileInput = document.getElementById("file");
 const addBtn = document.getElementById("add-btn");
-const addStatus = document.getElementById("add-status");
-const fileInput = document.getElementById("file")
 const uploadBtn = document.getElementById("uploadBtn");
+const addStatus = document.getElementById("add-status");
 
 uploadBtn.addEventListener("click", async () => {
   if(!fileInput.files.length)
@@ -165,12 +214,22 @@ uploadBtn.addEventListener("click", async () => {
   const formData = new FormData();
   formData.append("file", fileInput.files[0]);
 
-  const response = await fetch(`/insert_excel?filename=${encodeURIComponent(fileInput.files[0].name)}`, {
+  const res = await fetch("/insert_excel", {
       method: "POST",
       body: formData
   });
 
-  if (!response.ok) {
+  const data = await res.json().catch(() => ({}));
+
+  let fails = data.failed.map(item => `${item.reason}`);
+
+  let failCountMsg = `${fails.length} insertion(s) failed:\n`;
+
+  let statusMsg = failCountMsg + (fails.length ? fails.join("\n") : "");
+
+  setStatus(document.getElementById("upload-status"), statusMsg, "err");
+
+  if (!res.ok) {
       alert("Upload failed");
       return;
   }

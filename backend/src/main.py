@@ -1,8 +1,9 @@
 import ctypes
 import re
+import io
 
 from typing import Annotated
-from fastapi import FastAPI, Query, Request, HTTPException
+from fastapi import FastAPI, Query, Request, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from .init import init_trie
@@ -66,8 +67,9 @@ async def insert_word(word: Annotated[ str, Query(max_length=100, pattern=r'^[-a
     
 
 @app.post("/insert_excel", include_in_schema=False)
-async def insert_excel(filename: str, request: Request):
-    df = read_csv(filename, header=None)
+async def insert_excel(request: Request, file: UploadFile = File(...)):
+    contents = await file.read()
+    df = read_csv(io.BytesIO(contents), header=None)
 
     fields = ['location', 'code', 'name', 'quantity', 'quantifier', 'total']
 
@@ -78,8 +80,15 @@ async def insert_excel(filename: str, request: Request):
     names = [name.strip('"') if name.startswith('"') or name.endswith('"') else name
             for name in names]
 
+    results = {"inserted": [], "failed": []}
     for name in names:
-        await insert_word(name, request)
+        try:
+            await insert_word(name, request)
+            results["inserted"].append(name)
+        except HTTPException as e:
+            results["failed"].append({"word": name, "reason": e.detail})
+
+    return results
 
     
 

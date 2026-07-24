@@ -23,12 +23,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.site-header {
-  padding: 3rem 1.5rem 1.5rem;
-  text-align: center;
-  border-bottom: 1px solid var(--rule);
-}
-
 .wordmark {
   font-family: var(--font-display);
   font-size: 3rem;
@@ -204,6 +198,7 @@ body {
 }
 
 /* Buttons */
+
 .action-btn {
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
@@ -229,14 +224,6 @@ body {
 }
 .status-msg.ok { color: var(--accent-ink); }
 .status-msg.err { color: var(--danger); }
-
-.site-footer {
-  text-align: center;
-  padding: 2rem 1rem 3rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--ink-soft);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .panel.is-active { animation: none; }
