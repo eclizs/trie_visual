@@ -225,6 +225,43 @@ body {
 .status-msg.ok { color: var(--accent-ink); }
 .status-msg.err { color: var(--danger); }
 
+/* Secondary buttons (clear, copy, save, header, upload) */
+.btn-secondary {
+  margin-top: 0.5rem;
+  margin-right: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
+}
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 2px;
+}
+
+/* Header input row (Add Header button + label input) */
+.header-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.header-wrapper .text-input {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .panel.is-active { animation: none; }
 }

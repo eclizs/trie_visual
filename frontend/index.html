@@ -39,15 +39,15 @@
       <div class="saved-panel">
         <label class="field-label">Saved words</label>
         <pre class="saved-list" id="saved-list"></pre>
-        <button id="clearBtn" type="button">Clear</button>
-        <button id="copyBtn" type="button">Copy to clipboard</button>
+        <button id="clearBtn" class="btn-secondary" type="button">Clear</button>
+        <button id="copyBtn" class="btn-secondary" type="button">Copy to clipboard</button>
         <div>
-          <button id="saveBtn" type="button">Save as file</button>
+          <button id="saveBtn" class="btn-secondary" type="button">Save as file</button>
           <p class="status-msg" id="save-status" role="status"></p>
         </div>
         
         <div class="header-wrapper">
-          <button id="headerBtn" type="button">Add Header</button>
+          <button id="headerBtn" class="btn-secondary" type="button">Add Header</button>
           <input
               id="header-input"
               class="text-input"
@@ -72,15 +72,13 @@
         maxlength="100"
       >
       <button class="action-btn" id="add-btn">Tambahkan</button>
-      <form method="post" enctype="multipart/form-data">
         <div>
           <input type="file" id="file" name="file" accept=".csv" />
         </div>
         <div>
-          <button id="uploadBtn" type="button">Submit</button>
+          <button id="uploadBtn" class="btn-secondary" type="button">Submit</button>
           <pre class="status-msg" id="upload-status" role="status"></pre>
         </div>
-      </form>
       <p class="status-msg" id="add-status" role="status"></p>
     </section>
 
